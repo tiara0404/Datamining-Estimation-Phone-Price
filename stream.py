@@ -1,5 +1,6 @@
 import pickle
-import streamlit as st 
+import streamlit as st
+import sklearn
 
 # membaca model
 phone_model = pickle.load(open('estimasi_harga_handphone.sav','rb'))
