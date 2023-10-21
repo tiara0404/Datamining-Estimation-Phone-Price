@@ -294,38 +294,73 @@ df['idBrand']=df['idBrand'].replace(['cat','sony','blackberry','lg','asus','goog
 df[['idBrand']]=df[['idBrand']].apply(pd.to_numeric)
 ```
 
+Inilah hasil perubahan tipe data masing-masing label setelah kita rubah
+![df.info](dfinfoafter.png) <br>
+
 ## Modeling
 
-Tahapan ini membahas mengenai model machine learning yang digunakan untuk menyelesaikan permasalahan. Anda perlu menjelaskan tahapan dan parameter yang digunakan pada proses pemodelan.
+Kita memilih feature untuk dijadikan faktor-faktor yang akan dihitung untuk meng-estimasi harga handphone
 
-**Rubrik/Kriteria Tambahan (Opsional)**:
+```bash
+features = ['BatteryCapacity','ScreenSize','RAM','Storage','JumlahKamera','cam1','cam2','cam3','cam4','idBrand']
+x = df[features]
+y = df['Price']
+x.shape, y.shape
+```
 
-- Menjelaskan kelebihan dan kekurangan dari setiap algoritma yang digunakan.
-- Jika menggunakan satu algoritma pada solution statement, lakukan proses improvement terhadap model dengan hyperparameter tuning. **Jelaskan proses improvement yang dilakukan**.
-- Jika menggunakan dua atau lebih algoritma pada solution statement, maka pilih model terbaik sebagai solusi. **Jelaskan mengapa memilih model tersebut sebagai model terbaik**.
+> ((407, 10), (407,))
+
+Lalu kita akan split data training dan data testing
+
+```bash
+from sklearn.model_selection import train_test_split
+x_train, x_test, y_train, y_test = train_test_split(x,y,random_state=10)
+y_test.shape
+```
+
+> (102,)
+
+Lalu kita akan membuat model Regresi Linear
+
+```bash
+from sklearn.linear_model import LinearRegression
+lr = LinearRegression()
+lr.fit(x_train,y_train)
+pred = lr.predict(x_test)
+```
+
+Kita akan melihat salah satu contoh hasil dari model regresi linear kita, yaitu pengaruh RAM terhadap Harga(Price)
+![lr](lr.png)
+
+Lalu berikut adalah skor akurasi dari model yang kita buat
+
+```bash
+score = lr.score(x_test,y_test)
+print('Akurasi model Regresi Linear', score)
+```
+
+> Akurasi model Regresi Linear 0.835273028050129
 
 ## Evaluation
 
-Pada bagian ini anda perlu menyebutkan metrik evaluasi yang digunakan. Lalu anda perlu menjelaskan hasil proyek berdasarkan metrik evaluasi yang digunakan.
+Pada model estimasi, salah satu metrik evaluasi yang cocok digunakan untuk menilai kelayakan model yang telah dibangun adalah RSME.
+RMSE merupakan salah satu cara untuk mengevaluasi model regresi linear dengan mengukur tingkat akurasi hasil perkiraan suatu model. RMSE dihitung dengan mengkuadratkan error (prediksi - observasi) dibagi dengan jumlah data (rata-rata), lalu diakarkan. RMSE tidak memiliki persamaan:
+![rsme](rsme.png)
 
-Sebagai contoh, Anda memiih kasus klasifikasi dan menggunakan metrik **akurasi, precision, recall, dan F1 score**. Jelaskan mengenai beberapa hal berikut:
+Mari kita implementasi metrik evaluasi RSME pada model yang telah kita bangun:
+```bash
+from sklearn import metrics
 
-- Penjelasan mengenai metrik yang digunakan
-- Menjelaskan hasil proyek berdasarkan metrik evaluasi
+rmse = np.sqrt(metrics.mean_squared_error(np.array(y_test), pred))
+print(rmse)
+```
+>120.65333980287093
 
-Ingatlah, metrik evaluasi yang digunakan harus sesuai dengan konteks data, problem statement, dan solusi yang diinginkan.
-
-**Rubrik/Kriteria Tambahan (Opsional)**:
-
-- Menjelaskan formula metrik dan bagaimana metrik tersebut bekerja.
+Didapatkan hasil sebesar 120.65333980287093. Mengutip dari [AskPython.com](https://www.askpython.com/python/examples/rmse-root-mean-square-error), bahwa jika 
+hasil dari perhitungan RSME dibawah 180, maka model tersebut bisa dikatakan baik, sebaliknya jika diatas 180 itu menunjukkan perbedaan yang cukup signifikan
+sehingga perlu adanya tuning parameter kembali terhadap fitur.
 
 ## Deployment
 
-pada bagian ini anda memberikan link project yang diupload melalui streamlit share. boleh ditambahkan screen shoot halaman webnya.
+Link Streamlit:
 
-**---Ini adalah bagian akhir laporan---**
-
-_Catatan:_
-
-- _Anda dapat menambahkan gambar, kode, atau tabel ke dalam laporan jika diperlukan. Temukan caranya pada contoh dokumen markdown di situs editor [Dillinger](https://dillinger.io/), [Github Guides: Mastering markdown](https://guides.github.com/features/mastering-markdown/), atau sumber lain di internet. Semangat!_
-- Jika terdapat penjelasan yang harus menyertakan code snippet, tuliskan dengan sewajarnya. Tidak perlu menuliskan keseluruhan kode project, cukup bagian yang ingin dijelaskan saja.
